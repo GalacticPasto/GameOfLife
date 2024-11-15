@@ -2,7 +2,7 @@
 #include <raylib.h>
 #include <stdio.h>
 
-#define SIZE 10
+#define SIZE 5
 
 #define WIDTH 1200
 #define HEIGHT 720
@@ -53,6 +53,7 @@ int main()
     bool canRun = false;
     bool reset = false;
     bool isPressed = false;
+
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
@@ -87,7 +88,7 @@ int main()
 
         for (int i = 0; i < GRIDHEIGHT; i++)
         {
-            for (int j = 0; j < GRIDHEIGHT; j++)
+            for (int j = 0; j < GRIDWIDTH; j++)
             {
                 backGrid[i][j] = grid[i][j];
             }

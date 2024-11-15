@@ -1,7 +1,6 @@
-#include "../include/raylib.h"
 #include <math.h>
+#include <raylib.h>
 #include <stdio.h>
-#include <string.h>
 
 #define SIZE 10
 
@@ -18,7 +17,7 @@ void drawGrid()
     {
         Vector2 startPos = {0, i};
         Vector2 endPos = {WIDTH, i};
-        DrawLineV(startPos, endPos, LIGHTGRAY);
+        DrawLineV(startPos, endPos, MAGENTA);
     }
 
     // col
@@ -26,7 +25,7 @@ void drawGrid()
     {
         Vector2 startPos = {i, 0};
         Vector2 endPos = {i, HEIGHT};
-        DrawLineV(startPos, endPos, LIGHTGRAY);
+        DrawLineV(startPos, endPos, MAGENTA);
     }
 }
 
@@ -43,8 +42,8 @@ int main()
 
     int grid[GRIDHEIGHT][GRIDWIDTH] = {0};
 
-    int xDir[4] = {1, 0, -1, 0};
-    int yDir[4] = {0, 1, 0, -1};
+    int xDir[8] = {1, 0, -1, 0, -1, 1, 1, -1};
+    int yDir[8] = {0, 1, 0, -1, -1, 1, -1, 1};
 
     Vector2 selectPos = {SIZE, SIZE};
     Vector2 selectSize = {SIZE, SIZE};
@@ -52,7 +51,8 @@ int main()
     Color selectColor = BLUE;
 
     bool canRun = false;
-
+    bool reset = false;
+    bool isPressed = false;
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
@@ -60,28 +60,47 @@ int main()
 
         Vector2 mousePos = GetMousePosition();
 
-        selectPos.x = floorf(mousePos.x / SIZE);
-        selectPos.y = floorf(mousePos.y / SIZE);
+        selectPos.x = (floor(mousePos.x / SIZE));
+        selectPos.y = (floor(mousePos.y / SIZE));
 
-        bool isPressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+        isPressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 
+        reset = IsKeyPressed(KEY_R);
         if (IsKeyPressed(KEY_P))
         {
             canRun = true;
         }
 
-        if ((tick == fps / tickRate) && canRun)
+        if (reset)
         {
-            int backGrid[GRIDHEIGHT][GRIDWIDTH] = {0};
+            canRun = false;
+            for (int i = 0; i < GRIDHEIGHT; i++)
+            {
+                for (int j = 0; j < GRIDWIDTH; j++)
+                {
+                    grid[i][j] = 0;
+                }
+            }
+        }
 
-            memcpy(backGrid, grid, sizeof(int) * GRIDHEIGHT * GRIDWIDTH);
+        int backGrid[GRIDHEIGHT][GRIDWIDTH] = {0};
 
-            for (int i = 1; i < GRIDHEIGHT; i++)
+        for (int i = 0; i < GRIDHEIGHT; i++)
+        {
+            for (int j = 0; j < GRIDHEIGHT; j++)
+            {
+                backGrid[i][j] = grid[i][j];
+            }
+        }
+
+        if (canRun)
+        {
+            for (int i = 1; i < GRIDHEIGHT - 1; i++)
             {
                 for (int j = 1; j < GRIDWIDTH - 1; j++)
                 {
                     int alive = 0;
-                    for (int k = 0; k < 4; k++)
+                    for (int k = 0; k < 8; k++)
                     {
                         int dy = i + yDir[k];
                         int dx = j + xDir[k];
@@ -91,14 +110,6 @@ int main()
                             alive++;
                         }
                     }
-                    if (backGrid[i - 1][j - 1])
-                        alive++;
-                    if (backGrid[i - 1][j + 1])
-                        alive++;
-                    if (backGrid[i + 1][j - 1])
-                        alive++;
-                    if (backGrid[i + 1][j + 1])
-                        alive++;
                     if (backGrid[i][j])
                     {
                         if (alive > 3 || alive < 2)
@@ -115,37 +126,27 @@ int main()
                     }
                 }
             }
-            tick = 0;
         }
 
         BeginDrawing();
         ClearBackground(BLACK);
-        Vector2 pos;
-        if (!canRun)
+
+        if (canRun == false)
         {
+            Vector2 pos;
             pos.x = selectPos.x * SIZE;
             pos.y = selectPos.y * SIZE;
             DrawRectangleV(pos, selectSize, selectColor);
             if (isPressed)
             {
-                grid[(int)pos.y][(int)pos.x] = 1;
+                grid[(int)selectPos.y][(int)selectPos.x] = 1;
             }
         }
-
-        char posx[64];
-        sprintf(posx, "%f", selectPos.x);
-        char posy[64];
-        sprintf(posy, "%f", selectPos.y);
-
-        DrawText(posx, 0, 0, 20, GREEN);
-        DrawText(posx, 0, 20, 20, GREEN);
-
-        // draw
         for (int i = 0; i < GRIDHEIGHT; i++)
         {
             for (int j = 0; j < GRIDWIDTH; j++)
             {
-                if (grid[i][j])
+                if (grid[i][j] == true)
                 {
                     Vector2 pos = {j * SIZE, i * SIZE};
                     Vector2 size = {SIZE, SIZE};
@@ -153,9 +154,6 @@ int main()
                 }
             }
         }
-        tick++;
-        if (tick >= fps)
-            tick = 0;
         EndDrawing();
     }
 

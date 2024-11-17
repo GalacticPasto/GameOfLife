@@ -1,8 +1,10 @@
 @echo off
-set includepath="C:\Program Files\vcpkg\installed\x64-windows\include"
-set libpath="C:\Program Files\vcpkg\installed\x64-windows\lib"
-mkdir ..\build
-pushd ..\build
-::cl -FC -Zi /std:c++latest gdi32.lib kernel32.lib msvcrt.lib opengl32.lib raylib.lib shell32.lib user32.lib winmm.lib ..\src\GameOfLife.cpp -I%includepath% /link /libpath:%libpath%
-cl -FC -Zi /std:clatest gdi32.lib kernel32.lib msvcrt.lib opengl32.lib raylib.lib shell32.lib user32.lib winmm.lib ..\src\GameOfLife.c -I%includepath% /link /libpath:%libpath%
-popd
+mkdir build
+set compilerflags= -FAsc -Zi /std:clatest
+set includeflags=-I"D:\Projects\raylib-5.0_win64_msvc16\include" 
+::                  set ^^^^^^^^^ this to your raylib include folder path 
+set linkerflags= gdi32.lib msvcrt.lib winmm.lib opengl32.lib shell32.lib raylib.lib user32.lib   /link /libpath:"D:\Projects\raylib-5.0_win64_msvc16\lib" /NODEFAULTLIB:libcmt
+::                                                                                                          set      ^^^^ this to your raylib lib folder
+pushd build
+cl ..\src\GameOfLife.c %compilerflags% %includeflags% %linkerflags%
+popd 
